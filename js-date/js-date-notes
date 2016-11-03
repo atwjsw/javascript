@@ -1,0 +1,8 @@
+var myDate =  new Date();
+
+myDate.getFullYear(); //2016
+myDate.getYear() //116
+myDate.getMonth()  //0-11
+myDate.getDay() //周几 0-6
+myDate.getDate() //本月第几日
+myDate.getTime() //毫秒时间值

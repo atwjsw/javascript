@@ -1,0 +1,12 @@
+信息滚动效果
+
+#应用场景： 热门晒单，热门活动， 滚动条
+
+#<marquee>标签， 
+- HTML5不用了
+- 因为它违反了W3C的武学道义，W3C江湖第一原则就是功能性分离即行为与表现的分离，只有恪守这个原则的标签才会被允许参加舞林大会，其他类似于marquee尔等皆是歪门邪道，武功再高也不要，不要！好像就是武功太高啦，哈哈
+- behavior: 滚动方式alternate（来回）, scroll（重复滚动）, slide(一次)
+- direction： 滚动方向， down，up，left，right
+- loop： 滚动次数 loop=-1，一直滚动下去
+- scrollamount 滚动速度
+- scrolldelay 滚动时延

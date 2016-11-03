@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>事件处理程序</title>
+</head>
+<body>
+	<h1>HTML事件处理程序</h1><hr>
+	<div id="box">
+		<input type="button" value="按钮" id="btn" onclick="alert('Hello Event!  ' + this.id)">
+		<input type="button" value="按钮2" id="btn2" onclick="showMessage()">
+	</div>
+	<h1>DOM0级事件处理程序</h1><hr>
+	<div id="box">
+		<input type="button" value="按钮3" id="btn3">		
+	</div>
+	<h1>DOM2级事件处理程序</h1><hr>
+	<div id="box">
+		<input type="button" value="按钮4" id="btn4">		
+	</div>
+	<script type="text/javascript">
+		//1. HTML事件处理程序
+		function showMessage() {
+			alert('Hello Event from showMessage()');	
+		}
+
+		//2. DOM0级事件处理程序
+		var btn3 = document.getElementById('btn3');
+		btn3.onclick = function() {
+			alert("Hello Event from DOM0级事件处理程序   " +this.value);
+		}
+		
+		//btn3.onclick = showMessage;
+		
+		//btn3.onclick = null;
+
+		//3. DOM2级事件处理程序,不要on
+		/*var btn4 = document.getElementById('btn4');
+		btn4.addEventListener("click", function() {
+			alert("Hello Event from DOM2级事件处理程序  " + this.value);
+		}, false);
+
+		btn4.addEventListener("click", showMessage, false)*/;
+		
+		//删除事件 - 匿名函数删不掉; addEventListener添加的事件只能用removeEventListener删除，不能用=null。
+		/*btn4.removeEventListener("click", function() {
+			alert("Hello Event from DOM2级事件处理程序");
+		}, false);
+
+		btn4.removeEventListener("click", showMessage, false);*/
+
+		//4. IE事件处理程序, 又要on了
+		//btn4.attachEvent("onclick", showMessage);
+		//btn4.attachEvent("onclick", function() {alert("IE");});
+		//btn4.detachEvent("onclick", showMessage);
+
+		//5. 跨浏览器兼容
+		var eventUtil = {
+			addEventHandler: function(element, type, handler) {
+				if (element.addEventListener) {
+					element.addEventListener(type, handler, false);
+				} else if (element.attachEvent) {
+					element.attachEvent("on"+type, handler);
+				} else {
+					element['on'+type] = handler;
+				}
+			},
+			removeEventHandler: function(element, type, handler) {
+				if (element.removeEventListener) {
+					element.removeEventListener(type, handler, false);
+				} else if (element.detachEvent) {
+					element.detachEvent("on"+type, handler);
+				} else {
+					element['on'+type] = null;
+				}
+			}
+		}
+
+		var btn4 = document.getElementById('btn4');
+		eventUtil.addEventHandler(btn4, "click", showMessage);
+		eventUtil.removeEventHandler(btn4, "click", showMessage);
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,637 @@
+JavaScript Native
+
+#JS数据类型
+##弱类型语言：
+var可以只代表变量，里面可以放各种类型。实际类型是赋值时再确定的。
+var num = 32;
+num = "this is string"; 
+
+##弱类型语言声明时省事但操作中存在类型转换的问题，而且规则比较复杂。例如
+32 + 32; //64
+"32" + 32;  //"3232"
+"32" - 32;	//0
+
+##原始类型
+- number
+- string
+- boolean
+- null
+- undefined
+
+##对象 Object: 除了以上原始类型外其他都是对象
+- Function 函数
+- Array 数组
+- Date 日期
+
+#JS隐式转换 (+, - , ==)
+##严格等于 ===
+- 类型不同，返回false
+- 类型相同：值需要完全一致
+- null===null; //true 
+- undefiend === undefined; //true
+- NaN === NaN; //false
+- new Object() === new Object(); //false 对象比较是只有是同一对象的引用才相等。
+
+##隐式转换 ==
+- 类型相同：值相等则返回true
+- 类型不同会尝试转换
+- null == undefined; //true
+- number == string； /转成number 1=="1.0" 为true
+- boolean == 任何其他类型；布尔值先转换为0，再比较 1==true 为true
+- object == number | String 尝试对象转为基本类型再比较：new String('hi') == 'hi' 为true， new String('123') == 123为true;
+- "1.23" == 1.23; //true
+- false == 0; //true
+- new Object() == new Object(); //false
+- [1,2] == [1,2]; //false
+
+
+##隐式转换 +/-
+- "32" + 32;  //"3232"
+- "32" - 32;	//0
+
+#包装对象
+- var str = '123456'; //str是基本对象，但可以调用String属性和对象的方法，如length，substr等，原因是JS会创建一个临时对象。
+
+str是string(基本类型)，本身是没有方法的。当尝试把基本类型的str当做对象一样访问时，例如：str.length; 解释器会创建一个临时的包装对象，伪代码：
+[[tempObj]] = new String(str);
+[[tempObj]].length; // 返回具体的length;
+delete [[tempObj]]; // 销毁临时对象
+重复访问str.length会重复创建这个临时对象。
+所以str.t赋值可以成功，但再次访问str.t返回undefined，因为每次创建的临时包装对象都是不同的。
+
+- var strObj = new String('123456'); //String的包装对象，有各种属性方法，可以增加新属性和方法。
+
+- number, boolean基本类型也是同样的原理。例如
+- var num = 123; num.toString() 返回"123"
+
+#类型监测
+## typeof ： 适合基本类型和function检测，遇到null则失效（返回object）
+- typeof 100 //"number"
+- typroe true //"boolean"
+- typeof function //"function"
+- typeof (undefined); //"undefined"
+- typeof [1,2]; //"object"
+- typeof NaN; //"number"
+- typeof null; //"object" 这个比较特殊，null本身是一个基本类型应该返回"null"，但返回的是"object", 为什么？是历史原因，为了保持与现有代码的兼容，维持这一做法。
+
+## instanceof： 适合自定义对象，也可检测原生对象，但在不同window和iframe间会失效。
+- obj instanceof Object
+- 左操作数为对象，右操作数必须为函数对象或者函数构造器；判断左操作数对象的原型链上是否有右操作数的Prototype属性。
+- [1,2] instanceof Array === true;
+- new Object instanceof Array === false;
+
+## object.prototype.toString()： 适合内置对象和基本类型，IE6/7/8 null和undefined失效（返回Object)
+- Object.prototype.toString.apply([]); //"[object Array]"
+- Object.prototype.toString.apply(function(){}); //"[object Function]"
+- Object.prototype.toString.apply(null); //"[object Null]"
+- Object.prototype.toString.apply(undefined); //"[object Undefined]"
+* IE6/7/8 Object.prototype.toString.apply(null); //"[object Object]"
+
+- Object.prototype.toString.apply([]); //"[object Array]"
+- Object.prototype.toString.apply([]); //"[object Array]"
+
+## constructor
+- 检查构造器
+
+## duck type
+- 通过一些属性、方法特征判断。Array有length属性， join方法
+
+# 表达式
+- 能够计算一个值的JS代码
+- 原始表达式：常量、直接量 3.14，"test"; 关键字：null, this, true; 变量：i,j,k
+- 复合表达式： 10*20
+- 数组、对象的初始化表达式：
+[1,2], new Array(1,2)
+[1,,,4], [1,undefined,undefined, 4] 
+{x:1,y:2}, var o = new Object(); o.x=1, o.y=2
+- 函数表达式
+var fe = function(){};
+(function(){console.log('hello world');})(); //匿名函数放在括号内，直接调用
+- 属性访问表达式：var o= {x:1}; o.x; o['x']
+- 调用表达式： func(); //调用函数
+- 对象创建表达式：new Func(1,2); new Object;
+
+#运算符
+## 按数量分：
+- 一元： +num
+- 二元： a+b
+- 三元： c?a:b
+
+## 按功能分：
+赋值： a = 5;
+比较： a > b;
+算术： a + b;
+位： a | b;
+逻辑：exp1 && exp2
+字符串："a" + "b"
+特殊： delete obj.x
+
+特殊运算符举例
+? : c?a:b
+,: var val=(1,2,3); //val=3 依次计算，分隔的表达式，取最右边的值
+in： window.x=1; 'x' in window; //true
+instanceof: {} instanceof Object //true
+typeof 100 === "number" //true
+new: var obj = new Foo();
+this: //window(浏览器)
+void 0 //undefined
+void(0) //undefined
+
+##运算优先级
+
+delete 
+
+#JS语句
+## 没有块级作用域
+for (var i=0;i<10;i++) {}
+= 
+var i=0
+for(l i<10;i++) {}
+所有循环完成后，i仍然存在，i=10
+-
+{						var x=1; {
+	var x=1;	= 		//....	
+	//...
+}						}
+
+## 有函数作用域
+
+
+## try-catch
+try {}
+catch{}
+finally{}
+
+## 函数声明
+var f = function() {};
+
+## 函数表达式
+function fd() {};
+
+##for...in
+var p;
+var obj = {x=1;y=2}
+for (p in obj) {};
+
+##switch
+
+##while, do, for
+
+##with //不建议使用，严格模式下禁用
+
+#JS严格模式
+- 严格模式是一种特殊的执行模式，它修复了部分语言上的不足，提供更强的错误检查，并增强安全性。
+- 向上兼容，写一些复杂后端代码，nodejs的，健壮性要求比较高的代码时，比较有用
+
+function  func() {
+	'use strict';
+}
+
+'use strict'
+function func() {
+}
+
+- 不允许用with SyntaxError
+- 不允许未声明的变量被赋值 ReferenceError
+- arguments变为参数的静态副本
+(function(a) {console.log(a)})(1); //1
+!function(a) {console.log(a)}(1); //1
+!function(a) {console.log(arguments[0])}(1); //1
+!function(a) {arguments[0]=100; console.log(a)}(1); //100
+!function(a) {'use strict'; arguments[0]=100; console.log(a)}(1); //1 
+!function(a) {'use strict'; arguments[0].x=100; console.log(a.x)}({x:1}); //100 pass by sharing. 
+- delete参数、函数名报错 syntaxerror
+- delete不可配置的属性报错 syntaxerror
+- 对象字面量重复属性名报错 syntaxerror
+- 禁止八进制值
+- eval, arguments变为关键字，不能作为变量、函数名
+
+因为定义函数的调用方式应该是 function()，但是，如果我们尝试为一个“定义函数”末尾加上()，解析器是无法理解的。而使用括号包裹定义函数体，解析器将会以函数表达式的方式去调用定义函数。也就是说，任何能将函数变成一个函数表达式的作法，都可以使解析器正确的调用定义函数。而 ! 就是其中一个，而 + - || 都有这样的功能。
+那那个(1)的意思就很好理解了。等于var func = function(a){}; func(1);.
+
+http://www.w3schools.com/有大量习题
+
+#对象
+- 对象中包含一系列属性，这些属性都是无序的，每个属性都有一个字符串key和对应的value。
+- 对属性赋值时，属性的key如果是string以外的其他类型，会被用toString转为字符串
+var obj = {};
+obj[1] = 1;
+obj['1'] = 1; 
+obj: //Object{1:2}
+
+obj[{}] = true;
+obj[{x:1}] = true;
+obj: //Object{1:2,[object Object]:true}
+
+- 对象的属性可以动态添加或删除， 对象属性可以设置“属性标签”，如writable， enumerable， configurable，value，get/set, 用来控制访问权限
+- 对象原型 [[proto]]
+function foo() {}; //创建函数对象foo
+foo.prototype.z = 3; //函数对象的prototype中，添加属性z=3.
+var obj = new foo(); //通过new关键字，创建一个函数对象
+
+-对象创建方法1-字面量
+var obj1 ={x:1,y:2};
+obj1; //Object {x:1,y:2}; _proto_: Object
+
+var obj2 = 
+{
+	x:1,
+	y:2,
+	z: {a:9,b:10}
+}
+obj2; //Object {x: 1, y: 2, z: Object};  _proto_: Object
+
+用字面量创建的对象，其原型属性指向Object， Object的原型属性指向null
+
+-对象创建方法2-new/原型链
+准确的说，只有构造函数才有prototype属性
+通常我们自定义的函数都属于构造函数，所以都有此属性
+用new方法创建的对象，其原型属性指向构造函数的原型
+
+不使用new调用函数，就是正常的函数调用，return值作为返回值，若没有return语句则返回undefined。
+function foo() {
+    this; // 全局对象
+}
+foo(); // undefined
+
+使用new调用函数，函数将作为构造器，调用时函数内的this会指向以foo.prototype为原型的对象，若无return语句或return返回的不是对象，则将this作为返回值。
+function foo() {
+    this; // object
+    this.__proto__; // foo.prototype;
+}
+new foo(); // object
+
+- 对象创建 - Object.create
+
+#属性操作
+- 属性查询
+obj.x;
+obj['x'];
+
+for(p in f) {
+	console.log(f[p]);f
+}
+- 属性删除
+delete obj.x;
+
+#属性检测
+var cat = {};
+cat.legs = 4;
+cat.name='kitty';
+
+'legs' in cat; //true
+'abc' in cat; //false
+'toString' in cat; //true
+
+cat.hasOwnProperty('legs'); //true
+cat.hasOwnProperty('toString'); //false
+
+cat.propertyIsEnumerable('legs'); //true 
+cat.propertyIsEnumerable('toString'); //false, 原型链上大部分的属性的Enumerable属性都是false
+
+Object.defineProperty(cat, 'price', {enumerable:false, value:1000})；//Object.defineProperty方式设置属性，enumerable等参数默认是false
+cat.propertyIsEnumerable('price'); //false
+for (p in cat) {console.log(cat[p])}; //4 kitty price不输出
+cat.hasOwnProperty('price'); //true
+
+if (cat&&cat.legs) { cat.legs *=2; };
+cat.legs; //8
+
+if (cat.legs != undefined) { 
+	//!==undefined or !==null
+	console.log(cat.legs);
+}
+
+if (cat.legs !== undefined) { 
+	//cat.legs is undefined 
+}
+
+##属性枚举
+
+#属性标签
+Object.getOwnPropertyDescriptor({pro:true}, 'pro'); //Object {value: true, writable: true, enumerable: true, configurable: true}
+Object.defineProperites{person, {title:{}, corp:{}, salary:{}}}
+
+应用的场景也是很多的，但确实暂时并不是特别常见。
+
+Node.js编程，需要对属性的访问做控制，需要更健壮的get/set方法提供属性存取的控制。
+前端安全，通过Object.defineProperties禁止部分敏感属性的访问。来防止前端页面环境被插件、ISP等因素篡改。
+一些较为复杂的业务逻辑或较为底层的库，get/set/权限控制在一些情况下会让代码更加健壮。
+
+当然，defineProperties是IE9+才支持的方法，完美的普及和应用还需要一些时间，但不会太远。
+
+#对象标签
+[[proto]] : 原型标签
+[[class]] ：对象的类型 Object.prototype.toString
+[[extesnible]] : 对象是否可扩展
+
+function getType(o) {return Object.prototype.toString.call(o).slice(8,-1);}
+getType(new Number(1)); //"Number"
+
+#序列化
+var obj = {x:1,y:true, z:[1,2,3], nullVal:null};
+JSON.stringfy(obj);
+
+obj = JSON.parse({x:1});
+
+#数组
+- 数组是值的有序集合。每个值叫做元素，每个元素在数组中都有数字位置编号，也就是索引。JS中的数组是弱类型的，数组中
+可以含有不同类型的元素。 数组元素甚至可以是对象或其他数组。
+
+var arr = [1,true,null, undefined, {x:1}, [1,2,3]];
+for (var i=0;i<arr.length;i++) { console.log('arr['+i+']=' + arr[i]); }
+arr[0]=1
+arr[1]=true
+arr[2]=null
+arr[3]=undefined
+arr[4]=[object Object]
+arr[5]=1,2,3
+arr[5][2]; //3
+arr[4].x; //1
+
+## 数组创建
+- 字面量方式
+var BAT =['Alibaba', 'Tencent', 'baidu'];
+var students =[{name:'Bosn', age:27}, {name:'Nunnly', age:3}];
+var arrInArr = [[1,2], [3,4,5]];
+arrInArr[0][1]; //2
+
+- 数组大小 0< size < 2^23
+
+- new Array方式
+var array = new Array();
+var arrWithLength = new Array(100); //undefined * 100
+var arrLikesLiteral = new Array(true, false, null, 1, 2, "hi"); //等价于[true, false, null, 1,2 "hi"];
+
+## 数组元素读写
+arr[1]; 
+delete arr[0]；
+arr；
+[undefined × 1, 2, 3, 4, 5, 6]
+
+## 数组元素增删
+- JS数组是动态的，可以动态增删元素
+
+arr.push(3); //在尾部添加
+arr.unshfit(0); //在头部添加
+arr.shift(); //头部删除
+arr.pop(); //尾部删除
+delete arr[2]; //undefined, length不变
+
+## 数组迭代
+
+## 数组方法
+var arr = [1,2,3];
+arr.join(); //"1,2,3"
+arr.join("_"); //"1_2_3"
+
+arr.sort();
+
+var arr = [13, 24, 51, 3]; 
+arr.sort(); //[13, 24, 3, 51]
+arr.sort(function(a,b) { return a-b;}); //[3, 13, 24, 51]
+
+arr = [{age:25}, {age:39}, {age:99}];
+arr.sort(function(a, b) { return b.age - a.age;});
+arr.forEach(function(item) { console.log('age', item.age);});
+// age 99
+// age 39
+// age 25
+
+var arr = [1,2,3];
+arr.concat(4.5); //[1, 2, 3, 4.5]
+
+- slice 返回部分数组， 不修改原数组
+var arr = [1,2,3,4,5]; 
+arr.slice(1,3); //[2, 3]
+arr.slice(1,-1); //[2, 3, 4]
+arr.slice(-4, -3); //[2]
+
+- splice 数组拼接，修改原数组
+var arr = [1,2,3,4,5];
+arr.splice(2); //[3, 4, 5]
+arr； //[1, 2]
+
+var arr = [1,2,3,4,5];
+arr.splice(2,2) //[3, 4]
+arr； [1, 2, 5]
+
+arr.splice(1,1,'a','b'); //[2]
+arr; //[1, "a", "b", 3, 4, 5]
+
+- forEach 数组遍历， IE6/7/8 不支持
+arr.forEach(function(x, index, a) {console.log(x +'|' + index + '|' + (a === arr));});
+// 1|0|true
+// 2|1|true
+// 3|2|true
+// 4|3|true
+// 5|4|true
+
+- map 数组映射
+arr.map(function(x) { return x+10; }); //[11, 12, 13, 14, 15]
+arr; //[1, 2, 3, 4, 5]
+
+- filter 数组过滤
+arr.filter(function(x, index) { return x % 3 === 0 || x>=8; }); //[3, 6, 8, 9, 10]
+
+- every， some 数据判断
+var arr = [1,2,3,4,5,6,7,8,9,10];
+arr.every(function(x) { return x < 11;}); //true
+arr.some(function(x) { return x < 10;}); //true
+arr.every(function(x) { return x < 10;}); //false
+
+- reduce， reduceRight 数据聚合成单个结果
+
+- indexOf 数组检索
+- lastIndexOf 从右向左找
+var arr = [1,2,3,2,1];
+arr.indexOf(2); //1
+arr.indexOf(99); //-1
+arr.indexOf(1,1); //4
+arr.indexOf(1,-3); //4
+arr.indexOf(2,-1); //-1
+
+var arr = [1,2,3,2,1];
+arr.lastIndexOf(2); //3
+arr.lastIndexOf(2,-2); //3
+arr.lastIndexOf(2,-3); //1
+
+- 判断array
+Array.isArray([]); //true
+[] instanceof Array; //true
+({}).toString.apply([]); //"[object Array]"
+[].constructor === Array; //true
+
+#数组 vs. 对象
+相同：都可以继承，数组是对象，对象不一定是数组，都可以当作大灰熊添加删除属性
+
+#字符串和数组
+var str = 'hello world';
+str[1]; //e
+
+字符串是类数组对象；
+Array.prototype.join.call(str, "-"); //"h-e-l-l-o- -w-o-r-l-d"；
+call方法是任何函数对象都有的，因为函数对象原型链上都有Function.prototype对象，该对象提供了call/apply/bind这些方法。
+
+#函数
+- 函数是一块JS代码，被定义一次，但可执行和调用多次。
+- JS中的函数也是对象，所以JS函数可以像其他对象那样操作和传递。所以我们也常叫JS中的函数为函数对象。
+
+function foo(x, y) {
+	if (typeof x === "number" && typeof y === "number" ) {
+		return x + y;
+	} else {
+		return 0;
+	}
+}
+
+- this
+- arguments
+- 作用域
+- 不同调用方式： 直接调用， 对象方法， 构造器， call/apply/bind
+- 不同创建方法
+
+##函数声明
+- 以function开头，不加感叹号，不扩起来，不加复杂语句
+
+function add(a,b) {
+	return a+b;
+}
+
+#函数表达式
+//function variable. 匿名函数赋值给变量
+var add = function (a, b) {
+ 	return a + b;	
+};
+
+//IEF (Immediately Executed Function), 立即执行函数
+(function(a, b) {
+	alert(a+b);
+})(3,4);
+
+//first-class function
+return function() {
+	//do sth
+};
+
+//NFE (Named Function Expression),  命名函数表达式
+var add = function foo (a, b) {
+	// do sth
+}
+
+//函数声明前置
+
+#函数构造器，很少使用
+var func = new Function('a', 'b', 'console.log(a+b);');
+func(3,4) //7
+
+#this
+
+- 全局this就是window
+console.log(this === window); //true
+console.log(this.document === document); //true
+this.a = 37;
+console.log(window.a); //37
+
+function f1() {return this;}
+f1() === window; //true，nodejs 里面就是global
+
+- 作为对象方法的函数中的this，指向对象自身
+var o = {
+	prop: 37,
+	f: function() {
+		return this.prop;
+	}
+}
+console.log(o.f()); //37
+
+- this指向的对象可以变化
+var o = {prop: 37};
+var n = {prop: [1,2,3]};
+function independent() {
+	return this.prop;
+}
+o.f = independent;
+console.log(o.f()); //37
+n.g = independent;
+console.log(n.g()); //[1, 2, 3]
+
+- 对象原型链上的this
+var o = {f:function() {return this.a + this.b;}};
+var p = Object.create(o); //使用O作为原型创建空对象p
+p.a = 1; //p.a赋值1
+p.b = 4; //p.b赋值4
+console.log(p.f()); //调用p原型o的方法f，this也指向p
+
+- 构造器中的this
+function MyClass() {
+	this.a = 37;
+}
+
+var o = new MyClass();
+console.log(o.a);  //37
+
+function MyClass2() {
+	this.a = 37;
+	return {a:38};
+}
+
+var o = new MyClass2();
+console.log(o.a);  //38
+
+- call/apply方法与this， call/apply方法可以改变函数this的指向
+
+call方法的第一个实参就是要调用函数的母对象，他是调用上下文，bar函数里面的this指向的就是Number 7
+
+function add(c, d) {
+	return this.a + this.b + c + d;
+}
+
+var o = {a:1,b:3};
+add.call(o, 5, 7); //16 第一个实参就是this, 1+3+5+7=16
+add.apply(o, [5,7]); //16. apply与this基本一样，只是call是直接传入参数，apply是通过数组传入参数
+
+function bar() {
+	console.log(Object.prototype.toString.call(this));
+}
+
+bar.call(7); //[object Number]
+
+-bind方法与this
+function f() {
+	return this.a;
+}
+
+var g = f.bind({a: "test"});
+console.log(g()); //test
+
+var o = {a:37, f:f, g:g};
+console.log(o.f(), o.g()); //37 "test"
+
+深入理解javascript原型和闭包系列
+http://www.cnblogs.com/wangfupeng1988/p/4001284.html
+
+#OOP in JS
+- OOP的核心：继承、封装、多态、抽象， JS是如何实现的呢？
+
+- 基于原型的基础
+1. 函数有一个prototype属性，指向一个对象, 这个对象里面包括构造器属性，以及一个指向原型的属性，——proto——，一般函数的都是指向Object.prototype, Object.prototype上有各种对象方法，这也是为什么创建的对象能够使用这些方法。
+Foo.prototype.y = 2;
+var foo = new Foo();
+foo.y; //2 原型链上属性
+foo.x; //1 对象自身的属性
+
+Foo.prototye
+Object {constructor: function Foo(), y:2, _proto_:Object.prototype}
+
+
+2. 当用函数创建对象时，var foo = new Foo(); ——proto——会成为new出来对象的原型
+function Foo() {this.x=1;}
+Foo.prototype.y = 2;
+var foo = new Foo();
+
+3. 如果想要new出来的对象共享一些属性和函数，可以在prototype上创建
+
+
+
+
